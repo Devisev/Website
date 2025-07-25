@@ -8,11 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { sendLeadEmail } from '@/lib/leadEmail';
 
 const PaymentPage = () => {
   const navigate = useNavigate();
   const [bookingData, setBookingData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
   useEffect(() => {
     const savedBooking = localStorage.getItem('currentBooking');
@@ -28,25 +30,30 @@ const PaymentPage = () => {
     }
   }, [navigate]);
 
-  const handlePayment = () => {
+  const handlePayment = (method) => {
     setIsProcessing(true);
-    
+
     // Simulate payment processing
     setTimeout(() => {
       // Save to booking history
       const existingBookings = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
+
+      const offlineMethods = ['delivery', 'first_day'];
       const completedBooking = {
         ...bookingData,
         status: 'confirmed',
-        paymentStatus: 'paid',
+        paymentStatus: offlineMethods.includes(method) ? 'pending' : 'paid',
         paymentDate: new Date().toISOString(),
-        paymentMethod: 'razorpay'
+        paymentMethod: method
       };
       
       existingBookings.push(completedBooking);
       localStorage.setItem('bookingHistory', JSON.stringify(existingBookings));
       localStorage.removeItem('currentBooking');
-      
+
+      // Send booking details to Jaydev for fulfillment
+      sendLeadEmail(completedBooking);
+
       setIsProcessing(false);
       
       toast({
@@ -59,6 +66,10 @@ const PaymentPage = () => {
         navigate('/');
       }, 3000);
     }, 3000);
+  };
+
+  const handlePayClick = () => {
+    setShowPaymentOptions(true);
   };
 
   const handleRazorpayIntegration = () => {
@@ -234,7 +245,7 @@ const PaymentPage = () => {
                       </div>
 
                       <Button
-                        onClick={handlePayment}
+                        onClick={handlePayClick}
                         disabled={isProcessing}
                         className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 text-lg"
                       >
@@ -250,6 +261,26 @@ const PaymentPage = () => {
                           </div>
                         )}
                       </Button>
+
+                      {showPaymentOptions && (
+                        <div className="space-y-2">
+                          <Button onClick={() => handlePayment('card')} className="w-full">
+                            Pay with Card
+                          </Button>
+                          <Button onClick={() => handlePayment('upi')} className="w-full">
+                            Pay with UPI
+                          </Button>
+                          {bookingData.type === 'service' ? (
+                            <Button onClick={() => handlePayment('first_day')} className="w-full">
+                              Pay on First Day
+                            </Button>
+                          ) : (
+                            <Button onClick={() => handlePayment('delivery')} className="w-full">
+                              Pay on Delivery
+                            </Button>
+                          )}
+                        </div>
+                      )}
 
                       <Button
                         variant="outline"

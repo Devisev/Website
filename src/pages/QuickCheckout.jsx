@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import emailjs from 'emailjs-com';
+import { sendLeadEmail } from '@/lib/leadEmail';
 
 const QuickCheckout = () => {
   const navigate = useNavigate();
@@ -42,35 +42,6 @@ const QuickCheckout = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const sendLeadEmail = (data) => {
-    const templateParams = {
-      to_email: 'jaydev0018@gmail.com',
-      from_name: data.name,
-      from_phone: data.phone,
-      from_address: data.address,
-      booking_type: data.type,
-      item_name: data.type === 'service' ? data.service : data.equipment,
-      booking_date: data.date,
-      price: data.price,
-      message_html: `
-        <h2>New Lead from Website</h2>
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Phone:</strong> ${data.phone}</p>
-        <p><strong>Address:</strong> ${data.address}</p>
-        <p><strong>Type:</strong> ${data.type}</p>
-        <p><strong>Item:</strong> ${data.type === 'service' ? data.service : data.equipment}</p>
-        <p><strong>Date:</strong> ${data.date}</p>
-        <p><strong>Total Price:</strong> ₹${data.price}</p>
-      `
-    };
-
-    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams, 'YOUR_USER_ID')
-      .then((response) => {
-         console.log('SUCCESS!', response.status, response.text);
-      }, (err) => {
-         console.log('FAILED...', err);
-      });
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();

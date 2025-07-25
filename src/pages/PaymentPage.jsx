@@ -13,6 +13,7 @@ const PaymentPage = () => {
   const navigate = useNavigate();
   const [bookingData, setBookingData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
   useEffect(() => {
     const savedBooking = localStorage.getItem('currentBooking');
@@ -28,7 +29,7 @@ const PaymentPage = () => {
     }
   }, [navigate]);
 
-  const handlePayment = () => {
+  const handlePayment = (method) => {
     setIsProcessing(true);
     
     // Simulate payment processing
@@ -40,7 +41,7 @@ const PaymentPage = () => {
         status: 'confirmed',
         paymentStatus: 'paid',
         paymentDate: new Date().toISOString(),
-        paymentMethod: 'razorpay'
+        paymentMethod: method
       };
       
       existingBookings.push(completedBooking);
@@ -59,6 +60,14 @@ const PaymentPage = () => {
         navigate('/');
       }, 3000);
     }, 3000);
+  };
+
+  const handlePayClick = () => {
+    if (bookingData.type === 'equipment') {
+      setShowPaymentOptions(true);
+    } else {
+      handlePayment('razorpay');
+    }
   };
 
   const handleRazorpayIntegration = () => {
@@ -234,7 +243,7 @@ const PaymentPage = () => {
                       </div>
 
                       <Button
-                        onClick={handlePayment}
+                        onClick={handlePayClick}
                         disabled={isProcessing}
                         className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 text-lg"
                       >
@@ -250,6 +259,20 @@ const PaymentPage = () => {
                           </div>
                         )}
                       </Button>
+
+                      {showPaymentOptions && (
+                        <div className="space-y-2">
+                          <Button onClick={() => handlePayment('card')} className="w-full">
+                            Pay with Card
+                          </Button>
+                          <Button onClick={() => handlePayment('upi')} className="w-full">
+                            Pay with UPI
+                          </Button>
+                          <Button onClick={() => handlePayment('cod')} className="w-full">
+                            Cash on Delivery
+                          </Button>
+                        </div>
+                      )}
 
                       <Button
                         variant="outline"

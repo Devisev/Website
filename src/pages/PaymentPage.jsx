@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { sendLeadEmail } from '@/lib/leadEmail';
 
 const PaymentPage = () => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ const PaymentPage = () => {
 
   const handlePayment = (method) => {
     setIsProcessing(true);
-    
+
     // Simulate payment processing
     setTimeout(() => {
       // Save to booking history
@@ -47,7 +48,10 @@ const PaymentPage = () => {
       existingBookings.push(completedBooking);
       localStorage.setItem('bookingHistory', JSON.stringify(existingBookings));
       localStorage.removeItem('currentBooking');
-      
+
+      // Send booking details to Jaydev for fulfillment
+      sendLeadEmail(completedBooking);
+
       setIsProcessing(false);
       
       toast({

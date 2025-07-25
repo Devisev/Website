@@ -13,6 +13,7 @@ import { toast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { servicesData } from '@/data/healthcareData';
+import { sendLeadEmail } from '@/lib/leadEmail';
 
 const BookingPage = () => {
   const navigate = useNavigate();
@@ -71,6 +72,11 @@ const BookingPage = () => {
     };
 
     localStorage.setItem('currentBooking', JSON.stringify(bookingData));
+
+    sendLeadEmail({
+      ...bookingData,
+      name: formData.patientName
+    });
     
     toast({
       title: "Booking Details Saved!",

@@ -13,6 +13,7 @@ import { toast } from '@/components/ui/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { equipmentData } from '@/data/healthcareData';
+import { sendLeadEmail } from '@/lib/leadEmail';
 
 const RentalPage = () => {
   const navigate = useNavigate();
@@ -77,6 +78,11 @@ const RentalPage = () => {
     };
 
     localStorage.setItem('currentBooking', JSON.stringify(rentalData));
+
+    sendLeadEmail({
+      ...rentalData,
+      name: formData.customerName
+    });
     
     toast({
       title: "Rental Details Saved!",

@@ -37,10 +37,12 @@ const PaymentPage = () => {
     setTimeout(() => {
       // Save to booking history
       const existingBookings = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
+
+      const offlineMethods = ['delivery', 'first_day'];
       const completedBooking = {
         ...bookingData,
         status: 'confirmed',
-        paymentStatus: 'paid',
+        paymentStatus: offlineMethods.includes(method) ? 'pending' : 'paid',
         paymentDate: new Date().toISOString(),
         paymentMethod: method
       };
@@ -67,11 +69,7 @@ const PaymentPage = () => {
   };
 
   const handlePayClick = () => {
-    if (bookingData.type === 'equipment') {
-      setShowPaymentOptions(true);
-    } else {
-      handlePayment('razorpay');
-    }
+    setShowPaymentOptions(true);
   };
 
   const handleRazorpayIntegration = () => {
@@ -272,9 +270,15 @@ const PaymentPage = () => {
                           <Button onClick={() => handlePayment('upi')} className="w-full">
                             Pay with UPI
                           </Button>
-                          <Button onClick={() => handlePayment('cod')} className="w-full">
-                            Cash on Delivery
-                          </Button>
+                          {bookingData.type === 'service' ? (
+                            <Button onClick={() => handlePayment('first_day')} className="w-full">
+                              Pay on First Day
+                            </Button>
+                          ) : (
+                            <Button onClick={() => handlePayment('delivery')} className="w-full">
+                              Pay on Delivery
+                            </Button>
+                          )}
                         </div>
                       )}
 
